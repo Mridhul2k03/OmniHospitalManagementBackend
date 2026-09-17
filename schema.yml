@@ -1,0 +1,6981 @@
+openapi: 3.0.3
+info:
+  title: Hospitality Management Operating System (HMOS) API
+  version: 1.0.0
+  description: Enterprise PMS, Front Office, Corporate Governance, F&B/KOT, and Operations
+    REST API
+paths:
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomTokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: v1_auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/auth/users/:
+    get:
+      operationId: v1_auth_users_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: organization
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - ACCOUNTANT
+          - CEO
+          - CHEF_KITCHEN
+          - DRIVER
+          - FRONT_DESK
+          - GUEST
+          - HOUSEKEEPING
+          - HR
+          - MAINTENANCE
+          - OPERATIONS_DIRECTOR
+          - ORG_ADMIN
+          - PRESIDENT
+          - PROPERTY_MANAGER
+          - RESTAURANT_POS
+          - SECURITY_STAFF
+          - SHAREHOLDER
+          - SUPER_ADMIN
+          - TRANSPORT_DISPATCHER
+          - TRANSPORT_VENDOR
+          - VICE_PRESIDENT
+        description: |-
+          * `SUPER_ADMIN` - Super Admin
+          * `ORG_ADMIN` - Organization Admin
+          * `PRESIDENT` - President
+          * `VICE_PRESIDENT` - Vice President
+          * `CEO` - CEO
+          * `OPERATIONS_DIRECTOR` - Operations Director
+          * `SHAREHOLDER` - Shareholder
+          * `PROPERTY_MANAGER` - Property Manager
+          * `FRONT_DESK` - Front Desk
+          * `HOUSEKEEPING` - Housekeeping
+          * `RESTAURANT_POS` - Restaurant / POS
+          * `CHEF_KITCHEN` - Chef / Kitchen
+          * `MAINTENANCE` - Maintenance
+          * `ACCOUNTANT` - Accountant
+          * `HR` - HR Staff
+          * `SECURITY_STAFF` - Security / Gate Staff
+          * `TRANSPORT_DISPATCHER` - Transport Dispatcher
+          * `DRIVER` - Driver
+          * `TRANSPORT_VENDOR` - Transport Vendor
+          * `GUEST` - Guest
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: v1_auth_users_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/auth/users/{id}/:
+    get:
+      operationId: v1_auth_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this User.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_auth_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this User.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_auth_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this User.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: v1_auth_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this User.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/availability/search/:
+    get:
+      operationId: v1_availability_search_retrieve
+      parameters:
+      - in: query
+        name: adults
+        schema:
+          type: integer
+          default: 1
+        description: Number of adult guests
+      - in: query
+        name: check_in
+        schema:
+          type: string
+        description: Check-in date YYYY-MM-DD
+        required: true
+      - in: query
+        name: check_out
+        schema:
+          type: string
+        description: Check-out date YYYY-MM-DD
+        required: true
+      - in: query
+        name: property_id
+        schema:
+          type: string
+        description: Target property UUID
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilitySearchResponse'
+          description: ''
+  /api/v1/billing/charge-events/:
+    get:
+      operationId: v1_billing_charge_events_list
+      parameters:
+      - in: query
+        name: folio
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - ACTIVITIES
+          - BANQUET
+          - DAMAGE
+          - LAUNDRY
+          - MINIBAR
+          - OTHER
+          - POS_RESTAURANT
+          - ROOM_RATE
+          - ROOM_SERVICE
+          - SPA
+        description: |-
+          * `ROOM_RATE` - Room Rate Charge
+          * `POS_RESTAURANT` - Restaurant / Bar POS
+          * `ROOM_SERVICE` - Room Service
+          * `SPA` - Spa Treatment
+          * `ACTIVITIES` - Activities / Tours
+          * `LAUNDRY` - Laundry Service
+          * `MINIBAR` - Minibar Consumption
+          * `BANQUET` - Banquet / Event
+          * `DAMAGE` - Damage Penalty
+          * `OTHER` - Other Amenity
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ADJUSTED
+          - POSTED
+          - REVERSED
+          - VOIDED
+        description: |-
+          * `POSTED` - Posted
+          * `ADJUSTED` - Adjusted
+          * `VOIDED` - Voided
+          * `REVERSED` - Reversed
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChargeEventList'
+          description: ''
+  /api/v1/billing/charge-events/{id}/:
+    get:
+      operationId: v1_billing_charge_events_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Charge Event.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChargeEvent'
+          description: ''
+  /api/v1/billing/folios/:
+    get:
+      operationId: v1_billing_folios_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: reservation
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CLOSED
+          - OPEN
+          - SETTLED
+          - SUSPENDED
+        description: |-
+          * `OPEN` - Open
+          * `CLOSED` - Closed
+          * `SETTLED` - Settled
+          * `SUSPENDED` - Suspended
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFolioList'
+          description: ''
+    post:
+      operationId: v1_billing_folios_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+  /api/v1/billing/folios/{id}/:
+    get:
+      operationId: v1_billing_folios_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+    put:
+      operationId: v1_billing_folios_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+    patch:
+      operationId: v1_billing_folios_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFolioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFolioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFolioRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+    delete:
+      operationId: v1_billing_folios_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/billing/folios/{id}/charges/:
+    post:
+      operationId: v1_billing_folios_charges_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+  /api/v1/billing/folios/{id}/close/:
+    post:
+      operationId: v1_billing_folios_close_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Folio.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FolioRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Folio'
+          description: ''
+  /api/v1/buildings/:
+    get:
+      operationId: v1_buildings_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBuildingList'
+          description: ''
+    post:
+      operationId: v1_buildings_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+          description: ''
+  /api/v1/buildings/{id}/:
+    get:
+      operationId: v1_buildings_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this building.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+          description: ''
+    put:
+      operationId: v1_buildings_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this building.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuildingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+          description: ''
+    patch:
+      operationId: v1_buildings_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this building.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBuildingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBuildingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBuildingRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Building'
+          description: ''
+    delete:
+      operationId: v1_buildings_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this building.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/corporate/executive-assignments/:
+    get:
+      operationId: v1_corporate_executive_assignments_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - CEO
+          - OPERATIONS_DIRECTOR
+          - PRESIDENT
+          - VICE_PRESIDENT
+        description: |-
+          * `PRESIDENT` - President
+          * `VICE_PRESIDENT` - Vice President
+          * `CEO` - CEO
+          * `OPERATIONS_DIRECTOR` - Operations Director
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedExecutiveAssignmentList'
+          description: ''
+    post:
+      operationId: v1_corporate_executive_assignments_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveAssignment'
+          description: ''
+  /api/v1/corporate/executive-assignments/{id}/:
+    get:
+      operationId: v1_corporate_executive_assignments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Executive Assignment.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveAssignment'
+          description: ''
+    put:
+      operationId: v1_corporate_executive_assignments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Executive Assignment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExecutiveAssignmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveAssignment'
+          description: ''
+    patch:
+      operationId: v1_corporate_executive_assignments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Executive Assignment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExecutiveAssignmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExecutiveAssignmentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExecutiveAssignmentRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutiveAssignment'
+          description: ''
+    delete:
+      operationId: v1_corporate_executive_assignments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Executive Assignment.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/corporate/property-groups/:
+    get:
+      operationId: v1_corporate_property_groups_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyGroupList'
+          description: ''
+    post:
+      operationId: v1_corporate_property_groups_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyGroup'
+          description: ''
+  /api/v1/corporate/property-groups/{id}/:
+    get:
+      operationId: v1_corporate_property_groups_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property Group.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyGroup'
+          description: ''
+    put:
+      operationId: v1_corporate_property_groups_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property Group.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PropertyGroupRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyGroup'
+          description: ''
+    patch:
+      operationId: v1_corporate_property_groups_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property Group.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyGroupRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyGroupRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyGroupRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyGroup'
+          description: ''
+    delete:
+      operationId: v1_corporate_property_groups_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property Group.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/corporate/regions/:
+    get:
+      operationId: v1_corporate_regions_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRegionList'
+          description: ''
+    post:
+      operationId: v1_corporate_regions_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+  /api/v1/corporate/regions/{id}/:
+    get:
+      operationId: v1_corporate_regions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Region.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+    put:
+      operationId: v1_corporate_regions_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Region.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+    patch:
+      operationId: v1_corporate_regions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Region.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRegionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRegionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRegionRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+          description: ''
+    delete:
+      operationId: v1_corporate_regions_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Region.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/floors/:
+    get:
+      operationId: v1_floors_list
+      parameters:
+      - in: query
+        name: building
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFloorList'
+          description: ''
+    post:
+      operationId: v1_floors_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Floor'
+          description: ''
+  /api/v1/floors/{id}/:
+    get:
+      operationId: v1_floors_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this floor.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Floor'
+          description: ''
+    put:
+      operationId: v1_floors_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this floor.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FloorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Floor'
+          description: ''
+    patch:
+      operationId: v1_floors_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this floor.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFloorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFloorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFloorRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Floor'
+          description: ''
+    delete:
+      operationId: v1_floors_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this floor.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/frontoffice/check-in/:
+    post:
+      operationId: v1_frontoffice_check_in_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StayLog'
+          description: ''
+  /api/v1/frontoffice/check-out/:
+    post:
+      operationId: v1_frontoffice_check_out_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StayLog'
+          description: ''
+  /api/v1/frontoffice/stays/:
+    get:
+      operationId: v1_frontoffice_stays_list
+      parameters:
+      - in: query
+        name: is_id_verified
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: room
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStayLogList'
+          description: ''
+  /api/v1/frontoffice/stays/{id}/:
+    get:
+      operationId: v1_frontoffice_stays_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Stay Log.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StayLog'
+          description: ''
+  /api/v1/frontoffice/transfer-room/:
+    post:
+      operationId: v1_frontoffice_transfer_room_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StayLogRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StayLog'
+          description: ''
+  /api/v1/guests/:
+    get:
+      operationId: v1_guests_list
+      parameters:
+      - in: query
+        name: nationality
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: vip_status
+        schema:
+          type: boolean
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGuestProfileList'
+          description: ''
+    post:
+      operationId: v1_guests_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuestProfile'
+          description: ''
+  /api/v1/guests/{id}/:
+    get:
+      operationId: v1_guests_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Guest Profile.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuestProfile'
+          description: ''
+    put:
+      operationId: v1_guests_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Guest Profile.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GuestProfileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuestProfile'
+          description: ''
+    patch:
+      operationId: v1_guests_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Guest Profile.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGuestProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGuestProfileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGuestProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuestProfile'
+          description: ''
+    delete:
+      operationId: v1_guests_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Guest Profile.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/organizations/:
+    get:
+      operationId: v1_organizations_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: subscription_tier
+        schema:
+          type: string
+          enum:
+          - ENTERPRISE
+          - PROFESSIONAL
+          - STARTER
+        description: |-
+          * `STARTER` - Starter
+          * `PROFESSIONAL` - Professional
+          * `ENTERPRISE` - Enterprise
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrganizationList'
+          description: ''
+    post:
+      operationId: v1_organizations_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+  /api/v1/organizations/{id}/:
+    get:
+      operationId: v1_organizations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Organization.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+    put:
+      operationId: v1_organizations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Organization.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+    patch:
+      operationId: v1_organizations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Organization.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: ''
+    delete:
+      operationId: v1_organizations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Organization.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/payments/:
+    get:
+      operationId: v1_payments_list
+      parameters:
+      - in: query
+        name: folio
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: gateway
+        schema:
+          type: string
+          enum:
+          - MANUAL_CASH
+          - OTHER
+          - RAZORPAY
+          - STRIPE
+        description: |-
+          * `MANUAL_CASH` - Manual Front Desk Cash
+          * `STRIPE` - Stripe Gateway
+          * `RAZORPAY` - Razorpay Gateway
+          * `OTHER` - Other External Gateway
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: payment_method
+        schema:
+          type: string
+          enum:
+          - BANK_TRANSFER
+          - CASH
+          - CREDIT_CARD
+          - DEBIT_CARD
+          - NET_BANKING
+          - UPI
+          - WALLET
+        description: |-
+          * `CREDIT_CARD` - Credit Card
+          * `DEBIT_CARD` - Debit Card
+          * `UPI` - UPI
+          * `NET_BANKING` - Net Banking
+          * `WALLET` - Digital Wallet
+          * `CASH` - Cash
+          * `BANK_TRANSFER` - Direct Bank Transfer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - AUTHORIZED
+          - FAILED
+          - PAID
+          - PARTIALLY_REFUNDED
+          - PENDING
+          - REFUNDED
+        description: |-
+          * `PENDING` - Pending Authorization
+          * `AUTHORIZED` - Authorized
+          * `PAID` - Paid / Captured
+          * `FAILED` - Failed
+          * `REFUNDED` - Refunded
+          * `PARTIALLY_REFUNDED` - Partially Refunded
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentList'
+          description: ''
+    post:
+      operationId: v1_payments_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/v1/payments/{id}/:
+    get:
+      operationId: v1_payments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Payment.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    put:
+      operationId: v1_payments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Payment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    patch:
+      operationId: v1_payments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Payment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPaymentRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    delete:
+      operationId: v1_payments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Payment.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/payments/{id}/refund/:
+    post:
+      operationId: v1_payments_refund_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Payment.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/v1/properties/:
+    get:
+      operationId: v1_properties_list
+      parameters:
+      - in: query
+        name: city
+        schema:
+          type: string
+      - in: query
+        name: country
+        schema:
+          type: string
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property_type
+        schema:
+          type: string
+          enum:
+          - BOUTIQUE
+          - BUSINESS_HOTEL
+          - HOTEL
+          - MOTEL
+          - RESORT
+          - VILLA
+        description: |-
+          * `HOTEL` - Hotel
+          * `RESORT` - Resort
+          * `BOUTIQUE` - Boutique Hotel
+          * `BUSINESS_HOTEL` - Business Hotel
+          * `MOTEL` - Motel
+          * `VILLA` - Villa / Apartments
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: state
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+    post:
+      operationId: v1_properties_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+  /api/v1/properties/{id}/:
+    get:
+      operationId: v1_properties_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    put:
+      operationId: v1_properties_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PropertyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    patch:
+      operationId: v1_properties_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPropertyRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    delete:
+      operationId: v1_properties_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Property.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/reservations/:
+    get:
+      operationId: v1_reservations_list
+      parameters:
+      - in: query
+        name: check_in_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: check_out_date
+        schema:
+          type: string
+          format: date
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - CORPORATE
+          - DIRECT
+          - EMAIL
+          - GUEST_APP
+          - OTA_AGODA
+          - OTA_BOOKING_COM
+          - OTA_EXPEDIA
+          - PHONE
+          - WALK_IN
+        description: |-
+          * `DIRECT` - Direct Website
+          * `GUEST_APP` - Guest Mobile App
+          * `WALK_IN` - Walk-in
+          * `PHONE` - Phone Booking
+          * `EMAIL` - Email Booking
+          * `OTA_BOOKING_COM` - Booking.com
+          * `OTA_AGODA` - Agoda
+          * `OTA_EXPEDIA` - Expedia
+          * `CORPORATE` - Corporate Partner
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - CHECKED_IN
+          - CHECKED_OUT
+          - CONFIRMED
+          - IN_HOUSE
+          - NO_SHOW
+          - PENDING
+        description: |-
+          * `PENDING` - Pending Payment / Guarantee
+          * `CONFIRMED` - Confirmed
+          * `CHECKED_IN` - Checked In
+          * `IN_HOUSE` - In-House
+          * `CHECKED_OUT` - Checked Out
+          * `CANCELLED` - Cancelled
+          * `NO_SHOW` - No Show
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReservationList'
+          description: ''
+    post:
+      operationId: v1_reservations_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /api/v1/reservations/{id}/:
+    get:
+      operationId: v1_reservations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Reservation.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+    put:
+      operationId: v1_reservations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Reservation.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+    patch:
+      operationId: v1_reservations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Reservation.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReservationRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+    delete:
+      operationId: v1_reservations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Reservation.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/reservations/{id}/cancel/:
+    post:
+      operationId: v1_reservations_cancel_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Reservation.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReservationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+  /api/v1/rooms/amenities/:
+    get:
+      operationId: v1_rooms_amenities_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoomAmenityList'
+          description: ''
+    post:
+      operationId: v1_rooms_amenities_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAmenity'
+          description: ''
+  /api/v1/rooms/amenities/{id}/:
+    get:
+      operationId: v1_rooms_amenities_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Room Amenity.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAmenity'
+          description: ''
+    put:
+      operationId: v1_rooms_amenities_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Room Amenity.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomAmenityRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAmenity'
+          description: ''
+    patch:
+      operationId: v1_rooms_amenities_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Room Amenity.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomAmenityRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomAmenityRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomAmenityRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomAmenity'
+          description: ''
+    delete:
+      operationId: v1_rooms_amenities_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Room Amenity.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/rooms/rate-plans/:
+    get:
+      operationId: v1_rooms_rate_plans_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: meal_plan
+        schema:
+          type: string
+          enum:
+          - AI
+          - BB
+          - FB
+          - HB
+          - RO
+        description: |-
+          * `RO` - Room Only
+          * `BB` - Bed & Breakfast
+          * `HB` - Half Board
+          * `FB` - Full Board
+          * `AI` - All Inclusive
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: room_type
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRatePlanList'
+          description: ''
+    post:
+      operationId: v1_rooms_rate_plans_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlan'
+          description: ''
+  /api/v1/rooms/rate-plans/{id}/:
+    get:
+      operationId: v1_rooms_rate_plans_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rate plan.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlan'
+          description: ''
+    put:
+      operationId: v1_rooms_rate_plans_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rate plan.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RatePlanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlan'
+          description: ''
+    patch:
+      operationId: v1_rooms_rate_plans_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rate plan.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRatePlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRatePlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRatePlanRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlan'
+          description: ''
+    delete:
+      operationId: v1_rooms_rate_plans_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rate plan.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/rooms/rates/:
+    get:
+      operationId: v1_rooms_rates_list
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+          format: date
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: rate_plan
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoomRateList'
+          description: ''
+    post:
+      operationId: v1_rooms_rates_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRate'
+          description: ''
+  /api/v1/rooms/rates/{id}/:
+    get:
+      operationId: v1_rooms_rates_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room rate.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRate'
+          description: ''
+    put:
+      operationId: v1_rooms_rates_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room rate.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomRateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRate'
+          description: ''
+    patch:
+      operationId: v1_rooms_rates_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room rate.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRateRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomRate'
+          description: ''
+    delete:
+      operationId: v1_rooms_rates_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room rate.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/rooms/rooms/:
+    get:
+      operationId: v1_rooms_rooms_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: room_type
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - AVAILABLE
+          - BLOCKED
+          - CLEANING
+          - DIRTY
+          - INSPECTION
+          - MAINTENANCE
+          - OCCUPIED
+          - OUT_OF_ORDER
+          - RESERVED
+        description: |-
+          * `AVAILABLE` - Available
+          * `RESERVED` - Reserved
+          * `OCCUPIED` - Occupied
+          * `DIRTY` - Dirty
+          * `CLEANING` - Cleaning
+          * `INSPECTION` - Inspection
+          * `OUT_OF_ORDER` - Out of Order
+          * `MAINTENANCE` - Maintenance
+          * `BLOCKED` - Blocked
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoomList'
+          description: ''
+    post:
+      operationId: v1_rooms_rooms_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+          description: ''
+  /api/v1/rooms/rooms/{id}/:
+    get:
+      operationId: v1_rooms_rooms_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+          description: ''
+    put:
+      operationId: v1_rooms_rooms_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+          description: ''
+    patch:
+      operationId: v1_rooms_rooms_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+          description: ''
+    delete:
+      operationId: v1_rooms_rooms_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/rooms/types/:
+    get:
+      operationId: v1_rooms_types_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: property
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoomTypeList'
+          description: ''
+    post:
+      operationId: v1_rooms_types_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+          description: ''
+  /api/v1/rooms/types/{id}/:
+    get:
+      operationId: v1_rooms_types_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room type.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+          description: ''
+    put:
+      operationId: v1_rooms_types_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room type.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RoomTypeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+          description: ''
+    patch:
+      operationId: v1_rooms_types_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room type.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomTypeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomTypeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomTypeRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomType'
+          description: ''
+    delete:
+      operationId: v1_rooms_types_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this room type.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    AvailabilitySearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        property_id:
+          type: string
+          format: uuid
+        check_in:
+          type: string
+          format: date
+        check_out:
+          type: string
+          format: date
+        total_nights:
+          type: integer
+        available_room_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableRoomType'
+      required:
+      - available_room_types
+      - check_in
+      - check_out
+      - property_id
+      - total_nights
+    AvailableRoomType:
+      type: object
+      properties:
+        room_type_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        code:
+          type: string
+        base_occupancy:
+          type: integer
+        max_occupancy:
+          type: integer
+        nightly_rate:
+          type: number
+          format: double
+        total_nights:
+          type: integer
+        estimated_total:
+          type: number
+          format: double
+      required:
+      - base_occupancy
+      - code
+      - estimated_total
+      - max_occupancy
+      - name
+      - nightly_rate
+      - room_type_id
+      - total_nights
+    Building:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        floors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Floor'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        property:
+          type: string
+          format: uuid
+      required:
+      - code
+      - floors
+      - id
+      - name
+      - property
+    BuildingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        property:
+          type: string
+          format: uuid
+      required:
+      - code
+      - name
+      - property
+    ChargeEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        event_id:
+          type: string
+          readOnly: true
+        idempotency_key:
+          type: string
+          maxLength: 128
+        source:
+          $ref: '#/components/schemas/ChargeEventSourceEnum'
+        outlet_code:
+          type: string
+          maxLength: 64
+        description:
+          type: string
+          maxLength: 255
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        tax_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/ChargeEventStatusEnum'
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        folio:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+          nullable: true
+        room:
+          type: string
+          format: uuid
+          nullable: true
+        guest:
+          type: string
+          format: uuid
+        posted_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - created_at
+      - description
+      - event_id
+      - folio
+      - guest
+      - id
+      - idempotency_key
+      - organization
+      - property
+      - total_amount
+      - updated_at
+    ChargeEventRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 128
+        source:
+          $ref: '#/components/schemas/ChargeEventSourceEnum'
+        outlet_code:
+          type: string
+          maxLength: 64
+        description:
+          type: string
+          minLength: 1
+          maxLength: 255
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        tax_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/ChargeEventStatusEnum'
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        folio:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+          nullable: true
+        room:
+          type: string
+          format: uuid
+          nullable: true
+        guest:
+          type: string
+          format: uuid
+        posted_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - description
+      - folio
+      - guest
+      - idempotency_key
+      - organization
+      - property
+    ChargeEventSourceEnum:
+      enum:
+      - ROOM_RATE
+      - POS_RESTAURANT
+      - ROOM_SERVICE
+      - SPA
+      - ACTIVITIES
+      - LAUNDRY
+      - MINIBAR
+      - BANQUET
+      - DAMAGE
+      - OTHER
+      type: string
+      description: |-
+        * `ROOM_RATE` - Room Rate Charge
+        * `POS_RESTAURANT` - Restaurant / Bar POS
+        * `ROOM_SERVICE` - Room Service
+        * `SPA` - Spa Treatment
+        * `ACTIVITIES` - Activities / Tours
+        * `LAUNDRY` - Laundry Service
+        * `MINIBAR` - Minibar Consumption
+        * `BANQUET` - Banquet / Event
+        * `DAMAGE` - Damage Penalty
+        * `OTHER` - Other Amenity
+    ChargeEventStatusEnum:
+      enum:
+      - POSTED
+      - ADJUSTED
+      - VOIDED
+      - REVERSED
+      type: string
+      description: |-
+        * `POSTED` - Posted
+        * `ADJUSTED` - Adjusted
+        * `VOIDED` - Voided
+        * `REVERSED` - Reversed
+    CustomTokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    ExecutiveAssignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/ExecutiveAssignmentRoleEnum'
+        is_active:
+          type: boolean
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+        assigned_regions:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - created_at
+      - id
+      - organization
+      - role
+      - updated_at
+      - user
+      - user_name
+    ExecutiveAssignmentRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/ExecutiveAssignmentRoleEnum'
+        is_active:
+          type: boolean
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+        assigned_regions:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - organization
+      - role
+      - user
+    ExecutiveAssignmentRoleEnum:
+      enum:
+      - PRESIDENT
+      - VICE_PRESIDENT
+      - CEO
+      - OPERATIONS_DIRECTOR
+      type: string
+      description: |-
+        * `PRESIDENT` - President
+        * `VICE_PRESIDENT` - Vice President
+        * `CEO` - CEO
+        * `OPERATIONS_DIRECTOR` - Operations Director
+    Floor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        floor_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        name:
+          type: string
+          maxLength: 64
+        building:
+          type: string
+          format: uuid
+      required:
+      - building
+      - floor_number
+      - id
+      - name
+    FloorRequest:
+      type: object
+      properties:
+        floor_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        building:
+          type: string
+          format: uuid
+      required:
+      - building
+      - floor_number
+      - name
+    Folio:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        charge_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeEvent'
+          readOnly: true
+        guest_name:
+          type: string
+          readOnly: true
+        property_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        folio_number:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/FolioStatusEnum'
+        total_charges:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        total_payments:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        currency:
+          type: string
+          maxLength: 3
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+      required:
+      - balance
+      - charge_events
+      - created_at
+      - folio_number
+      - guest
+      - guest_name
+      - id
+      - organization
+      - property
+      - property_name
+      - reservation
+      - total_charges
+      - total_payments
+      - updated_at
+    FolioRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/FolioStatusEnum'
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+      required:
+      - guest
+      - organization
+      - property
+      - reservation
+    FolioStatusEnum:
+      enum:
+      - OPEN
+      - CLOSED
+      - SETTLED
+      - SUSPENDED
+      type: string
+      description: |-
+        * `OPEN` - Open
+        * `CLOSED` - Closed
+        * `SETTLED` - Settled
+        * `SUSPENDED` - Suspended
+    GatewayEnum:
+      enum:
+      - MANUAL_CASH
+      - STRIPE
+      - RAZORPAY
+      - OTHER
+      type: string
+      description: |-
+        * `MANUAL_CASH` - Manual Front Desk Cash
+        * `STRIPE` - Stripe Gateway
+        * `RAZORPAY` - Razorpay Gateway
+        * `OTHER` - Other External Gateway
+    GuestProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        organization_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        first_name:
+          type: string
+          maxLength: 128
+        last_name:
+          type: string
+          maxLength: 128
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 32
+        id_document_type:
+          $ref: '#/components/schemas/IdDocumentTypeEnum'
+        id_document_number:
+          type: string
+          maxLength: 64
+        nationality:
+          type: string
+          maxLength: 64
+        vip_status:
+          type: boolean
+        preferences: {}
+        notes:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - organization
+      - organization_name
+      - updated_at
+    GuestProfileRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 32
+        id_document_type:
+          $ref: '#/components/schemas/IdDocumentTypeEnum'
+        id_document_number:
+          type: string
+          maxLength: 64
+        nationality:
+          type: string
+          maxLength: 64
+        vip_status:
+          type: boolean
+        preferences: {}
+        notes:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - email
+      - first_name
+      - last_name
+      - organization
+    IdDocumentTypeEnum:
+      enum:
+      - PASSPORT
+      - NATIONAL_ID
+      - DRIVING_LICENSE
+      - OTHER
+      type: string
+      description: |-
+        * `PASSPORT` - Passport
+        * `NATIONAL_ID` - National ID Card
+        * `DRIVING_LICENSE` - Driving License
+        * `OTHER` - Other
+    MealPlanEnum:
+      enum:
+      - RO
+      - BB
+      - HB
+      - FB
+      - AI
+      type: string
+      description: |-
+        * `RO` - Room Only
+        * `BB` - Bed & Breakfast
+        * `HB` - Half Board
+        * `FB` - Full Board
+        * `AI` - All Inclusive
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Unique organizational slug/subdomain identifier
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        legal_name:
+          type: string
+          maxLength: 255
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+        subscription_tier:
+          $ref: '#/components/schemas/SubscriptionTierEnum'
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - contact_email
+      - created_at
+      - id
+      - name
+      - updated_at
+    OrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          description: Unique organizational slug/subdomain identifier
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        legal_name:
+          type: string
+          maxLength: 255
+        contact_email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+        subscription_tier:
+          $ref: '#/components/schemas/SubscriptionTierEnum'
+        is_active:
+          type: boolean
+      required:
+      - code
+      - contact_email
+      - name
+    PaginatedBuildingList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Building'
+    PaginatedChargeEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChargeEvent'
+    PaginatedExecutiveAssignmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExecutiveAssignment'
+    PaginatedFloorList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Floor'
+    PaginatedFolioList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Folio'
+    PaginatedGuestProfileList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestProfile'
+    PaginatedOrganizationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+    PaginatedPaymentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    PaginatedPropertyGroupList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PropertyGroup'
+    PaginatedPropertyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    PaginatedRatePlanList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatePlan'
+    PaginatedRegionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Region'
+    PaginatedReservationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+    PaginatedRoomAmenityList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomAmenity'
+    PaginatedRoomList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+    PaginatedRoomRateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomRate'
+    PaginatedRoomTypeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomType'
+    PaginatedStayLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StayLog'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedBuildingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        property:
+          type: string
+          format: uuid
+    PatchedExecutiveAssignmentRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/ExecutiveAssignmentRoleEnum'
+        is_active:
+          type: boolean
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+        assigned_regions:
+          type: array
+          items:
+            type: string
+            format: uuid
+    PatchedFloorRequest:
+      type: object
+      properties:
+        floor_number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        building:
+          type: string
+          format: uuid
+    PatchedFolioRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/FolioStatusEnum'
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+    PatchedGuestProfileRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 32
+        id_document_type:
+          $ref: '#/components/schemas/IdDocumentTypeEnum'
+        id_document_number:
+          type: string
+          maxLength: 64
+        nationality:
+          type: string
+          maxLength: 64
+        vip_status:
+          type: boolean
+        preferences: {}
+        notes:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        user:
+          type: string
+          format: uuid
+          nullable: true
+    PatchedOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          description: Unique organizational slug/subdomain identifier
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        legal_name:
+          type: string
+          maxLength: 255
+        contact_email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+        subscription_tier:
+          $ref: '#/components/schemas/SubscriptionTierEnum'
+        is_active:
+          type: boolean
+    PatchedPaymentRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        gateway:
+          $ref: '#/components/schemas/GatewayEnum'
+        idempotency_key:
+          type: string
+          maxLength: 128
+        gateway_payload: {}
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        folio:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+          nullable: true
+        guest:
+          type: string
+          format: uuid
+        recorded_by:
+          type: string
+          format: uuid
+          nullable: true
+    PatchedPropertyGroupRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+    PatchedPropertyRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          description: Property code e.g. GRAND-NYC
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        property_type:
+          $ref: '#/components/schemas/PropertyTypeEnum'
+        address:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          minLength: 1
+          maxLength: 128
+        state:
+          type: string
+          minLength: 1
+          maxLength: 128
+        country:
+          type: string
+          minLength: 1
+          maxLength: 64
+        postal_code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        contact_email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        contact_phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        check_in_time:
+          type: string
+          format: time
+        check_out_time:
+          type: string
+          format: time
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+          nullable: true
+    PatchedRatePlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        meal_plan:
+          $ref: '#/components/schemas/MealPlanEnum'
+        cancellation_policy:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+    PatchedRegionRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+    PatchedReservationRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        source:
+          $ref: '#/components/schemas/ReservationSourceEnum'
+        status:
+          $ref: '#/components/schemas/ReservationStatusEnum'
+        check_in_date:
+          type: string
+          format: date
+        check_out_date:
+          type: string
+          format: date
+        total_adults:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        total_children:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        paid_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        special_requests:
+          type: string
+        idempotency_key:
+          type: string
+          maxLength: 128
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+    PatchedRoomAmenityRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        icon:
+          type: string
+          maxLength: 64
+        description:
+          type: string
+          maxLength: 255
+    PatchedRoomRateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        rate_plan:
+          type: string
+          format: uuid
+    PatchedRoomRequest:
+      type: object
+      properties:
+        room_number:
+          type: string
+          minLength: 1
+          maxLength: 32
+        status:
+          $ref: '#/components/schemas/RoomStatusEnum'
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+        floor:
+          type: string
+          format: uuid
+          nullable: true
+    PatchedRoomTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        base_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        max_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        description:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+    PatchedUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        role:
+          $ref: '#/components/schemas/UserRoleEnum'
+        organization:
+          type: string
+          format: uuid
+          nullable: true
+          description: Organization/tenant to which this user belongs
+        phone_number:
+          type: string
+          maxLength: 32
+        is_2fa_enabled:
+          type: boolean
+        is_active:
+          type: boolean
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        refunds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRefund'
+          readOnly: true
+        guest_name:
+          type: string
+          readOnly: true
+        folio_number:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          maxLength: 3
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        gateway:
+          $ref: '#/components/schemas/GatewayEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        transaction_id:
+          type: string
+          readOnly: true
+        idempotency_key:
+          type: string
+          maxLength: 128
+        gateway_payload: {}
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        folio:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+          nullable: true
+        guest:
+          type: string
+          format: uuid
+        recorded_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - created_at
+      - folio
+      - folio_number
+      - guest
+      - guest_name
+      - id
+      - organization
+      - paid_at
+      - property
+      - refunds
+      - status
+      - transaction_id
+      - updated_at
+    PaymentMethodEnum:
+      enum:
+      - CREDIT_CARD
+      - DEBIT_CARD
+      - UPI
+      - NET_BANKING
+      - WALLET
+      - CASH
+      - BANK_TRANSFER
+      type: string
+      description: |-
+        * `CREDIT_CARD` - Credit Card
+        * `DEBIT_CARD` - Debit Card
+        * `UPI` - UPI
+        * `NET_BANKING` - Net Banking
+        * `WALLET` - Digital Wallet
+        * `CASH` - Cash
+        * `BANK_TRANSFER` - Direct Bank Transfer
+    PaymentRefund:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        reason:
+          type: string
+        status:
+          $ref: '#/components/schemas/PaymentRefundStatusEnum'
+        refund_transaction_id:
+          type: string
+          readOnly: true
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        payment:
+          type: string
+          format: uuid
+        processed_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - created_at
+      - id
+      - organization
+      - payment
+      - reason
+      - refund_transaction_id
+      - updated_at
+    PaymentRefundRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        reason:
+          type: string
+          minLength: 1
+        status:
+          $ref: '#/components/schemas/PaymentRefundStatusEnum'
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        payment:
+          type: string
+          format: uuid
+        processed_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - organization
+      - payment
+      - reason
+    PaymentRefundStatusEnum:
+      enum:
+      - PENDING
+      - PROCESSED
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PROCESSED` - Processed
+        * `FAILED` - Failed
+    PaymentRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        gateway:
+          $ref: '#/components/schemas/GatewayEnum'
+        idempotency_key:
+          type: string
+          maxLength: 128
+        gateway_payload: {}
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        folio:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+          nullable: true
+        guest:
+          type: string
+          format: uuid
+        recorded_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - amount
+      - folio
+      - guest
+      - organization
+      - property
+    PaymentStatusEnum:
+      enum:
+      - PENDING
+      - AUTHORIZED
+      - PAID
+      - FAILED
+      - REFUNDED
+      - PARTIALLY_REFUNDED
+      type: string
+      description: |-
+        * `PENDING` - Pending Authorization
+        * `AUTHORIZED` - Authorized
+        * `PAID` - Paid / Captured
+        * `FAILED` - Failed
+        * `REFUNDED` - Refunded
+        * `PARTIALLY_REFUNDED` - Partially Refunded
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        organization_name:
+          type: string
+          readOnly: true
+        buildings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Building'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          description: Property code e.g. GRAND-NYC
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        property_type:
+          $ref: '#/components/schemas/PropertyTypeEnum'
+        address:
+          type: string
+        city:
+          type: string
+          maxLength: 128
+        state:
+          type: string
+          maxLength: 128
+        country:
+          type: string
+          maxLength: 64
+        postal_code:
+          type: string
+          maxLength: 32
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 32
+        currency:
+          type: string
+          maxLength: 3
+        check_in_time:
+          type: string
+          format: time
+        check_out_time:
+          type: string
+          format: time
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - address
+      - buildings
+      - city
+      - code
+      - contact_email
+      - contact_phone
+      - created_at
+      - id
+      - name
+      - organization
+      - organization_name
+      - postal_code
+      - state
+      - updated_at
+    PropertyGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - organization
+      - region
+      - updated_at
+    PropertyGroupRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+      required:
+      - code
+      - name
+      - organization
+      - region
+    PropertyRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          description: Property code e.g. GRAND-NYC
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        property_type:
+          $ref: '#/components/schemas/PropertyTypeEnum'
+        address:
+          type: string
+          minLength: 1
+        city:
+          type: string
+          minLength: 1
+          maxLength: 128
+        state:
+          type: string
+          minLength: 1
+          maxLength: 128
+        country:
+          type: string
+          minLength: 1
+          maxLength: 64
+        postal_code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        contact_email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        contact_phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        check_in_time:
+          type: string
+          format: time
+        check_out_time:
+          type: string
+          format: time
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        region:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - address
+      - city
+      - code
+      - contact_email
+      - contact_phone
+      - name
+      - organization
+      - postal_code
+      - state
+    PropertyTypeEnum:
+      enum:
+      - HOTEL
+      - RESORT
+      - BOUTIQUE
+      - BUSINESS_HOTEL
+      - MOTEL
+      - VILLA
+      type: string
+      description: |-
+        * `HOTEL` - Hotel
+        * `RESORT` - Resort
+        * `BOUTIQUE` - Boutique Hotel
+        * `BUSINESS_HOTEL` - Business Hotel
+        * `MOTEL` - Motel
+        * `VILLA` - Villa / Apartments
+    RatePlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        meal_plan:
+          $ref: '#/components/schemas/MealPlanEnum'
+        cancellation_policy:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+      required:
+      - code
+      - id
+      - name
+      - property
+      - room_type
+    RatePlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        meal_plan:
+          $ref: '#/components/schemas/MealPlanEnum'
+        cancellation_policy:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+      required:
+      - code
+      - name
+      - property
+      - room_type
+    Region:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+      required:
+      - code
+      - created_at
+      - id
+      - name
+      - organization
+      - updated_at
+    RegionRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+      required:
+      - code
+      - name
+      - organization
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        reservation_rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReservationRoom'
+          readOnly: true
+        guest_name:
+          type: string
+          readOnly: true
+        property_name:
+          type: string
+          readOnly: true
+        total_nights:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        confirmation_code:
+          type: string
+          readOnly: true
+        source:
+          $ref: '#/components/schemas/ReservationSourceEnum'
+        status:
+          $ref: '#/components/schemas/ReservationStatusEnum'
+        check_in_date:
+          type: string
+          format: date
+        check_out_date:
+          type: string
+          format: date
+        total_adults:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        total_children:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        paid_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          maxLength: 3
+        special_requests:
+          type: string
+        idempotency_key:
+          type: string
+          maxLength: 128
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+      required:
+      - check_in_date
+      - check_out_date
+      - confirmation_code
+      - created_at
+      - guest
+      - guest_name
+      - id
+      - organization
+      - property
+      - property_name
+      - reservation_rooms
+      - total_amount
+      - total_nights
+      - updated_at
+    ReservationRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        source:
+          $ref: '#/components/schemas/ReservationSourceEnum'
+        status:
+          $ref: '#/components/schemas/ReservationStatusEnum'
+        check_in_date:
+          type: string
+          format: date
+        check_out_date:
+          type: string
+          format: date
+        total_adults:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        total_children:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        paid_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+          minLength: 1
+          maxLength: 3
+        special_requests:
+          type: string
+        idempotency_key:
+          type: string
+          maxLength: 128
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+      required:
+      - check_in_date
+      - check_out_date
+      - guest
+      - organization
+      - property
+    ReservationRoom:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        room_type_name:
+          type: string
+          readOnly: true
+        room_number:
+          type: string
+          readOnly: true
+        nightly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        reservation:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+        allocated_room:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - id
+      - nightly_rate
+      - reservation
+      - room_number
+      - room_type
+      - room_type_name
+    ReservationRoomRequest:
+      type: object
+      properties:
+        nightly_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        reservation:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+        allocated_room:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - nightly_rate
+      - reservation
+      - room_type
+    ReservationSourceEnum:
+      enum:
+      - DIRECT
+      - GUEST_APP
+      - WALK_IN
+      - PHONE
+      - EMAIL
+      - OTA_BOOKING_COM
+      - OTA_AGODA
+      - OTA_EXPEDIA
+      - CORPORATE
+      type: string
+      description: |-
+        * `DIRECT` - Direct Website
+        * `GUEST_APP` - Guest Mobile App
+        * `WALK_IN` - Walk-in
+        * `PHONE` - Phone Booking
+        * `EMAIL` - Email Booking
+        * `OTA_BOOKING_COM` - Booking.com
+        * `OTA_AGODA` - Agoda
+        * `OTA_EXPEDIA` - Expedia
+        * `CORPORATE` - Corporate Partner
+    ReservationStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - CHECKED_IN
+      - IN_HOUSE
+      - CHECKED_OUT
+      - CANCELLED
+      - NO_SHOW
+      type: string
+      description: |-
+        * `PENDING` - Pending Payment / Guarantee
+        * `CONFIRMED` - Confirmed
+        * `CHECKED_IN` - Checked In
+        * `IN_HOUSE` - In-House
+        * `CHECKED_OUT` - Checked Out
+        * `CANCELLED` - Cancelled
+        * `NO_SHOW` - No Show
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        room_type_name:
+          type: string
+          readOnly: true
+        floor_name:
+          type: string
+          readOnly: true
+        room_number:
+          type: string
+          maxLength: 32
+        status:
+          $ref: '#/components/schemas/RoomStatusEnum'
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+        floor:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - floor_name
+      - id
+      - property
+      - room_number
+      - room_type
+      - room_type_name
+    RoomAmenity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        icon:
+          type: string
+          maxLength: 64
+        description:
+          type: string
+          maxLength: 255
+      required:
+      - id
+      - name
+    RoomAmenityRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        icon:
+          type: string
+          maxLength: 64
+        description:
+          type: string
+          maxLength: 255
+      required:
+      - name
+    RoomRate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        date:
+          type: string
+          format: date
+        rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        rate_plan:
+          type: string
+          format: uuid
+      required:
+      - date
+      - id
+      - rate
+      - rate_plan
+    RoomRateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        rate_plan:
+          type: string
+          format: uuid
+      required:
+      - date
+      - rate
+      - rate_plan
+    RoomRequest:
+      type: object
+      properties:
+        room_number:
+          type: string
+          minLength: 1
+          maxLength: 32
+        status:
+          $ref: '#/components/schemas/RoomStatusEnum'
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+        room_type:
+          type: string
+          format: uuid
+        floor:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - property
+      - room_number
+      - room_type
+    RoomStatusEnum:
+      enum:
+      - AVAILABLE
+      - RESERVED
+      - OCCUPIED
+      - DIRTY
+      - CLEANING
+      - INSPECTION
+      - OUT_OF_ORDER
+      - MAINTENANCE
+      - BLOCKED
+      type: string
+      description: |-
+        * `AVAILABLE` - Available
+        * `RESERVED` - Reserved
+        * `OCCUPIED` - Occupied
+        * `DIRTY` - Dirty
+        * `CLEANING` - Cleaning
+        * `INSPECTION` - Inspection
+        * `OUT_OF_ORDER` - Out of Order
+        * `MAINTENANCE` - Maintenance
+        * `BLOCKED` - Blocked
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        amenities:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomAmenity'
+          readOnly: true
+        name:
+          type: string
+          maxLength: 128
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        base_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        max_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        description:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+      required:
+      - amenities
+      - base_price
+      - code
+      - id
+      - name
+      - property
+    RoomTypeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        base_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        max_occupancy:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        description:
+          type: string
+        is_active:
+          type: boolean
+        property:
+          type: string
+          format: uuid
+      required:
+      - base_price
+      - code
+      - name
+      - property
+    StayLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        guest_name:
+          type: string
+          readOnly: true
+        room_number:
+          type: string
+          readOnly: true
+        confirmation_code:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        check_in_time:
+          type: string
+          format: date-time
+          readOnly: true
+        check_out_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        is_id_verified:
+          type: boolean
+        signature_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        key_cards_issued:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+        room:
+          type: string
+          format: uuid
+        checked_in_by:
+          type: string
+          format: uuid
+          nullable: true
+        checked_out_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - check_in_time
+      - check_out_time
+      - confirmation_code
+      - created_at
+      - guest
+      - guest_name
+      - id
+      - organization
+      - property
+      - reservation
+      - room
+      - room_number
+      - updated_at
+    StayLogRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        is_id_verified:
+          type: boolean
+        signature_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        key_cards_issued:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        organization:
+          type: string
+          format: uuid
+          description: The tenant/organization that owns this record.
+        property:
+          type: string
+          format: uuid
+        reservation:
+          type: string
+          format: uuid
+        guest:
+          type: string
+          format: uuid
+        room:
+          type: string
+          format: uuid
+        checked_in_by:
+          type: string
+          format: uuid
+          nullable: true
+        checked_out_by:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - guest
+      - organization
+      - property
+      - reservation
+      - room
+    SubscriptionTierEnum:
+      enum:
+      - STARTER
+      - PROFESSIONAL
+      - ENTERPRISE
+      type: string
+      description: |-
+        * `STARTER` - Starter
+        * `PROFESSIONAL` - Professional
+        * `ENTERPRISE` - Enterprise
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username:
+          type: string
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/UserRoleEnum'
+        organization:
+          type: string
+          format: uuid
+          nullable: true
+          description: Organization/tenant to which this user belongs
+        organization_name:
+          type: string
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 32
+        is_2fa_enabled:
+          type: boolean
+        is_active:
+          type: boolean
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - full_name
+      - id
+      - organization_name
+      - username
+    UserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        role:
+          $ref: '#/components/schemas/UserRoleEnum'
+        organization:
+          type: string
+          format: uuid
+          nullable: true
+          description: Organization/tenant to which this user belongs
+        phone_number:
+          type: string
+          maxLength: 32
+        is_2fa_enabled:
+          type: boolean
+        is_active:
+          type: boolean
+      required:
+      - email
+      - username
+    UserRoleEnum:
+      enum:
+      - SUPER_ADMIN
+      - ORG_ADMIN
+      - PRESIDENT
+      - VICE_PRESIDENT
+      - CEO
+      - OPERATIONS_DIRECTOR
+      - SHAREHOLDER
+      - PROPERTY_MANAGER
+      - FRONT_DESK
+      - HOUSEKEEPING
+      - RESTAURANT_POS
+      - CHEF_KITCHEN
+      - MAINTENANCE
+      - ACCOUNTANT
+      - HR
+      - SECURITY_STAFF
+      - TRANSPORT_DISPATCHER
+      - DRIVER
+      - TRANSPORT_VENDOR
+      - GUEST
+      type: string
+      description: |-
+        * `SUPER_ADMIN` - Super Admin
+        * `ORG_ADMIN` - Organization Admin
+        * `PRESIDENT` - President
+        * `VICE_PRESIDENT` - Vice President
+        * `CEO` - CEO
+        * `OPERATIONS_DIRECTOR` - Operations Director
+        * `SHAREHOLDER` - Shareholder
+        * `PROPERTY_MANAGER` - Property Manager
+        * `FRONT_DESK` - Front Desk
+        * `HOUSEKEEPING` - Housekeeping
+        * `RESTAURANT_POS` - Restaurant / POS
+        * `CHEF_KITCHEN` - Chef / Kitchen
+        * `MAINTENANCE` - Maintenance
+        * `ACCOUNTANT` - Accountant
+        * `HR` - HR Staff
+        * `SECURITY_STAFF` - Security / Gate Staff
+        * `TRANSPORT_DISPATCHER` - Transport Dispatcher
+        * `DRIVER` - Driver
+        * `TRANSPORT_VENDOR` - Transport Vendor
+        * `GUEST` - Guest
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

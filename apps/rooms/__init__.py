@@ -1,0 +1,2 @@
+"""Rooms application package."""
+default_app_config = 'apps.rooms.apps.RoomsConfig'
