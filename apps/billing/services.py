@@ -117,3 +117,23 @@ class ChargeEventService:
             folio.recalculate_balance()
 
         return event
+
+    @classmethod
+    def void_charge_event(cls, charge_event, void_reason, voided_by=None):
+        """Voids a posted charge event with mandatory audit reason."""
+        if charge_event.status != 'POSTED':
+            raise ValidationError(
+                f"Cannot void charge with status '{charge_event.status}'. Only POSTED charges can be voided."
+            )
+
+        if not void_reason or not void_reason.strip():
+            raise ValidationError("A void reason is required for audit compliance.")
+
+        with transaction.atomic():
+            charge_event.status = 'VOIDED'
+            charge_event.save(update_fields=['status', 'updated_at'])
+
+            # Recalculate the folio balance after voiding
+            charge_event.folio.recalculate_balance()
+
+        return charge_event

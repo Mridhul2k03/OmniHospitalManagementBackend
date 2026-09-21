@@ -2,6 +2,8 @@
 Property serializers and viewsets.
 """
 from rest_framework import serializers, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from common.permissions import IsPropertyStaffOrAdmin
 from .models import Property, Building, Floor
 
@@ -47,6 +49,13 @@ class PropertyViewSet(viewsets.ModelViewSet):
         else:
             serializer.save(organization=self.request.user.organization)
 
+    @action(detail=True, methods=['get'])
+    def buildings(self, request, pk=None):
+        property_obj = self.get_object()
+        buildings = property_obj.buildings.all()
+        serializer = BuildingSerializer(buildings, many=True)
+        return Response(serializer.data)
+
 
 class BuildingViewSet(viewsets.ModelViewSet):
     serializer_class = BuildingSerializer
@@ -61,6 +70,13 @@ class BuildingViewSet(viewsets.ModelViewSet):
             return Building.objects.all()
         return Building.objects.filter(property__organization=user.organization)
 
+    @action(detail=True, methods=['get'])
+    def floors(self, request, pk=None):
+        building = self.get_object()
+        floors = building.floors.all()
+        serializer = FloorSerializer(floors, many=True)
+        return Response(serializer.data)
+
 
 class FloorViewSet(viewsets.ModelViewSet):
     serializer_class = FloorSerializer
@@ -74,3 +90,4 @@ class FloorViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return Floor.objects.all()
         return Floor.objects.filter(building__property__organization=user.organization)
+

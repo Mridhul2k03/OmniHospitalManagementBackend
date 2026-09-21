@@ -1,7 +1,9 @@
 """
 Rooms, Room Types, and Rates serializers and viewsets.
 """
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from common.permissions import IsPropertyStaffOrAdmin
 from .models import RoomAmenity, RoomType, Room, RatePlan, RoomRate
 
@@ -75,6 +77,64 @@ class RoomViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return Room.objects.all()
         return Room.objects.filter(property__organization=user.organization)
+
+    @action(detail=True, methods=['post'], url_path='status-transition')
+    def status_transition(self, request, pk=None):
+        """State machine transition endpoint for room status."""
+        room = self.get_object()
+        new_status = request.data.get('status')
+        reason = request.data.get('reason', '')
+
+        valid_statuses = [choice[0] for choice in Room.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return Response(
+                {'success': False, 'error': {'code': 'INVALID_STATUS', 'message': f'Unknown room status: {new_status}. Valid: {valid_statuses}'}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        old_status = room.status
+        room.status = new_status
+        room.is_active = new_status not in ('OUT_OF_ORDER', 'BLOCKED')
+
+        room.save(update_fields=['status', 'is_active'])
+
+        return Response({
+            'success': True,
+            'data': RoomSerializer(room).data,
+            'message': f'Room {room.room_number} transitioned from {old_status} to {new_status}.',
+        })
+
+    @action(detail=True, methods=['post'], url_path='transfer')
+    def transfer(self, request, pk=None):
+        current_room = self.get_object()
+        target_room_id = request.data.get('targetRoomId') or request.data.get('target_room_id')
+        reason = request.data.get('reason', 'Operational transfer')
+        
+        try:
+            target_room = Room.objects.get(id=target_room_id)
+        except Room.DoesNotExist:
+            return Response(
+                {'success': False, 'error': {'code': 'NOT_FOUND', 'message': f'Target room {target_room_id} not found.'}},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        from apps.frontoffice.models import StayLog
+        from apps.frontoffice.services import FrontOfficeService
+        stay_log = StayLog.objects.filter(room=current_room, check_out_time__isnull=True).last()
+        if stay_log:
+            FrontOfficeService.transfer_room(reservation=stay_log.reservation, new_room=target_room)
+        else:
+            current_room.status = 'DIRTY'
+            current_room.save(update_fields=['status'])
+            target_room.status = 'OCCUPIED'
+            target_room.save(update_fields=['status'])
+
+        return Response({
+            'success': True,
+            'message': f"Transferred from {current_room.room_number} to {target_room.room_number}. Reason: {reason}",
+            'sourceRoom': RoomSerializer(current_room).data,
+            'targetRoom': RoomSerializer(target_room).data,
+        })
 
 
 class RatePlanViewSet(viewsets.ModelViewSet):

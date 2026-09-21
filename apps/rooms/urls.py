@@ -14,6 +14,7 @@ router.register(r'types', RoomTypeViewSet, basename='room-type')
 router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'rate-plans', RatePlanViewSet, basename='rate-plan')
 router.register(r'rates', RoomRateViewSet, basename='room-rate')
+router.register(r'', RoomViewSet, basename='room-root')
 
 urlpatterns = [
     path('', include(router.urls)),

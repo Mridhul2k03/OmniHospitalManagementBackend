@@ -12,11 +12,11 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.development')
 # Initialize Django ASGI application early to ensure AppRegistry is populated
 django_asgi_app = get_asgi_application()
 
+from apps.operations.routing import websocket_urlpatterns
+
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
-        URLRouter([
-            # WebSocket routes will be routed from apps
-        ])
+        URLRouter(websocket_urlpatterns)
     ),
 })

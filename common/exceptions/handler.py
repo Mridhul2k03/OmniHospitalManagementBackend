@@ -49,8 +49,10 @@ def custom_exception_handler(exc, context):
                 "message": message,
                 "details": details,
             },
-            "correlation_id": correlation_id,
-            "timestamp": current_timestamp,
+            "meta": {
+                "request_id": correlation_id,
+                "timestamp": current_timestamp,
+            },
         }
         response.data = custom_data
     else:
@@ -62,8 +64,10 @@ def custom_exception_handler(exc, context):
                 "message": str(exc) if getattr(request, 'user', None) and request.user.is_staff else "Internal server error.",
                 "details": None,
             },
-            "correlation_id": correlation_id,
-            "timestamp": current_timestamp,
+            "meta": {
+                "request_id": correlation_id,
+                "timestamp": current_timestamp,
+            },
         }
         response = Response(custom_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -3,6 +3,12 @@ from .base import (
     IsOrganizationAdmin,
     IsShareholderReadOnly,
     IsPropertyStaffOrAdmin,
+    IsDiningStaff,
+    IsHousekeepingStaff,
+    IsMaintenanceStaff,
+    IsSecurityStaff,
+    IsTransportStaff,
+    IsSpaStaff,
 )
 
 __all__ = [
@@ -10,4 +16,10 @@ __all__ = [
     'IsOrganizationAdmin',
     'IsShareholderReadOnly',
     'IsPropertyStaffOrAdmin',
+    'IsDiningStaff',
+    'IsHousekeepingStaff',
+    'IsMaintenanceStaff',
+    'IsSecurityStaff',
+    'IsTransportStaff',
+    'IsSpaStaff',
 ]

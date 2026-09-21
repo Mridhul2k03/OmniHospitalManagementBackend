@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.billing',
     'apps.payments',
     'apps.frontoffice',
+    'apps.operations',
 ]
 
 MIDDLEWARE = [
@@ -177,7 +178,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CORS configuration
-cors_origins_env = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173')
+cors_origins_env = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://localhost:5174')
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',') if origin.strip()]
 CORS_ALLOW_CREDENTIALS = True
 
