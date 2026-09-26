@@ -58,6 +58,7 @@ class Building(models.Model):
 
     class Meta:
         unique_together = ('property', 'code')
+        ordering = ['name']
 
     def __str__(self):
         return f"{self.name} ({self.property.name})"

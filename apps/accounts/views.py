@@ -14,6 +14,29 @@ from .serializers import UserSerializer, CustomTokenObtainPairSerializer
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            access_token = response.data.get('access')
+            refresh_token = response.data.get('refresh')
+            if access_token:
+                response.set_cookie(
+                    'access_token',
+                    access_token,
+                    httponly=True,
+                    samesite='Lax',
+                    max_age=3600
+                )
+            if refresh_token:
+                response.set_cookie(
+                    'refresh_token',
+                    refresh_token,
+                    httponly=True,
+                    samesite='Lax',
+                    max_age=7 * 86400
+                )
+        return response
+
 
 class CurrentUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -131,10 +154,40 @@ class LogoutView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        return Response({
+        response = Response({
             'success': True,
             'message': 'Logged out successfully.'
         })
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        return response
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        if not old_password or not new_password:
+            return Response(
+                {'success': False, 'error': {'code': 'MISSING_FIELDS', 'message': 'old_password and new_password are required.'}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if not user.check_password(old_password):
+            return Response(
+                {'success': False, 'error': {'code': 'INVALID_PASSWORD', 'message': 'Current password does not match.'}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(new_password) < 6:
+            return Response(
+                {'success': False, 'error': {'code': 'WEAK_PASSWORD', 'message': 'New password must be at least 6 characters.'}},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user.set_password(new_password)
+        user.save()
+        return Response({'success': True, 'message': 'Password updated successfully.'})
 
 
 class SwitchTenantView(APIView):
@@ -293,9 +346,13 @@ class UserViewSet(viewsets.ModelViewSet):
             'message': f"User {target_user.email} is now {'Active' if target_user.is_active else 'Deactivated'}."
         })
 
+    @action(detail=True, methods=['post'], url_path='toggle-status')
+    def toggle_status(self, request, pk=None):
+        return self.toggle_active(request, pk)
+
     @action(detail=True, methods=['post'], url_path='reset-password')
     def reset_password(self, request, pk=None):
-        password = request.data.get('password')
+        password = request.data.get('new_password') or request.data.get('password')
         if not password or len(password) < 6:
             return Response({'success': False, 'error': 'Password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
         target_user = self.get_object()

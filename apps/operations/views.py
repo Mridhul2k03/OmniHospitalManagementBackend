@@ -186,83 +186,282 @@ DRIVERS = [
 class DiningTablesView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
+    def get(self, request, pk=None):
+        if pk:
+            for table in DINING_TABLES:
+                if table["id"] == pk:
+                    return Response(table)
+            return Response({"error": "Table not found"}, status=404)
         return Response(DINING_TABLES)
+
+    def post(self, request):
+        data = request.data
+        new_id = f"tbl-{len(DINING_TABLES) + 1}"
+        new_table = {
+            "id": data.get("id", new_id),
+            "tableNumber": data.get("tableNumber", f"T-{len(DINING_TABLES) + 1:02d}"),
+            "section": data.get("section", "Main Dining Hall"),
+            "capacity": int(data.get("capacity", 4)),
+            "status": data.get("status", "available"),
+            "currentServer": data.get("currentServer", "Staff"),
+        }
+        DINING_TABLES.append(new_table)
+        return Response(new_table, status=status.HTTP_201_CREATED)
 
     def patch(self, request, pk=None):
         for table in DINING_TABLES:
             if table["id"] == pk:
                 table["status"] = request.data.get("status", table["status"])
+                if "tableNumber" in request.data:
+                    table["tableNumber"] = request.data.get("tableNumber")
+                if "section" in request.data:
+                    table["section"] = request.data.get("section")
+                if "capacity" in request.data:
+                    table["capacity"] = int(request.data.get("capacity"))
+                if "currentServer" in request.data:
+                    table["currentServer"] = request.data.get("currentServer")
                 return Response(table)
         return Response({"error": "Table not found"}, status=404)
+
+    def put(self, request, pk=None):
+        return self.patch(request, pk)
+
+    def delete(self, request, pk=None):
+        global DINING_TABLES
+        initial_len = len(DINING_TABLES)
+        DINING_TABLES = [t for t in DINING_TABLES if t["id"] != pk]
+        if len(DINING_TABLES) < initial_len:
+            return Response({"message": f"Table {pk} removed successfully."}, status=status.HTTP_200_OK)
+        return Response({"error": "Table not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class MenuItemsView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
+    def get(self, request, pk=None):
+        if pk:
+            for item in MENU_ITEMS:
+                if item["id"] == pk:
+                    return Response(item)
+            return Response({"error": "Item not found"}, status=404)
         category = request.query_params.get("category")
         items = [i for i in MENU_ITEMS if (not category or i["category"].lower() == category.lower())]
         return Response(items)
+
+    def post(self, request):
+        data = request.data
+        new_id = f"item-{len(MENU_ITEMS) + 1}"
+        new_item = {
+            "id": data.get("id", new_id),
+            "name": data.get("name", "New Dish"),
+            "category": data.get("category", "Mains"),
+            "price": float(data.get("price", 25.0)),
+            "station": data.get("station", "grill"),
+            "isAvailable": bool(data.get("isAvailable", True)),
+        }
+        MENU_ITEMS.append(new_item)
+        return Response(new_item, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, pk=None):
+        for item in MENU_ITEMS:
+            if item["id"] == pk:
+                if "name" in request.data:
+                    item["name"] = request.data.get("name")
+                if "category" in request.data:
+                    item["category"] = request.data.get("category")
+                if "price" in request.data:
+                    item["price"] = float(request.data.get("price"))
+                if "station" in request.data:
+                    item["station"] = request.data.get("station")
+                if "isAvailable" in request.data:
+                    item["isAvailable"] = bool(request.data.get("isAvailable"))
+                return Response(item)
+        return Response({"error": "Item not found"}, status=404)
+
+    def put(self, request, pk=None):
+        return self.patch(request, pk)
+
+    def delete(self, request, pk=None):
+        global MENU_ITEMS
+        initial_len = len(MENU_ITEMS)
+        MENU_ITEMS = [i for i in MENU_ITEMS if i["id"] != pk]
+        if len(MENU_ITEMS) < initial_len:
+            return Response({"message": f"Menu item {pk} deleted."}, status=status.HTTP_200_OK)
+        return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class DiningOrdersView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        return DiningOrderKOTView().post(request)
+
+
+class DiningOrderKOTView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
         data = request.data
+        items = data.get("items", [])
+        kot_id = f"kot-{len(KOT_ORDERS)+1}"
         new_kot = {
-            "id": f"kot-{len(KOT_ORDERS)+1}",
+            "id": kot_id,
             "ticketNumber": f"KOT-{8800 + len(KOT_ORDERS) + 1}",
-            "tableNumber": data.get("tableId", "T-01"),
-            "station": "grill",
-            "status": "new",
-            "serverName": data.get("serverName", "Staff"),
+            "tableNumber": data.get("tableNumber") or data.get("tableId", "T-01"),
+            "roomNumber": data.get("roomNumber", ""),
+            "serverName": data.get("serverName", "Julian Rios"),
             "guestCount": data.get("guestCount", 2),
-            "items": data.get("items", []),
-            "createdAt": datetime.now(timezone.utc).isoformat()
+            "station": data.get("station", "grill"),
+            "status": "preparing",
+            "items": [
+                {
+                    "itemId": f"item-{idx+1}",
+                    "menuItemId": it.get("menuItemId", f"item-{idx+1}"),
+                    "name": it.get("name", f"Menu Dish #{idx+1}"),
+                    "quantity": it.get("quantity", 1),
+                    "specialInstructions": it.get("specialInstructions", ""),
+                    "station": it.get("station", "grill"),
+                    "status": "preparing",
+                }
+                for idx, it in enumerate(items)
+            ] if items else [
+                {"itemId": "item-1", "name": "Wagyu Ribeye Steak (8oz)", "quantity": 1, "specialInstructions": "Medium-Rare", "station": "grill", "status": "preparing"}
+            ],
+            "createdAt": datetime.now(timezone.utc).isoformat(),
         }
         KOT_ORDERS.insert(0, new_kot)
+
+        # Broadcast via Channel Layer
+        try:
+            from asgiref.sync import async_to_sync
+            from channels.layers import get_channel_layer
+            channel_layer = get_channel_layer()
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)(
+                    "global",
+                    {"type": "broadcast.message", "channel": "kot", "payload": {"event": "KOT_ORDER_FIRED", "data": new_kot}}
+                )
+                async_to_sync(channel_layer.group_send)(
+                    "kot_prop-001",
+                    {"type": "kot_order_fired", "data": new_kot}
+                )
+        except Exception:
+            pass
+
         return Response(new_kot, status=status.HTTP_201_CREATED)
+
+
+class DiningOrderFolioView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        from apps.rooms.models import Room
+        from apps.billing.models import Folio
+        from apps.billing.services import ChargeEventService
+
+        room_number = request.data.get("roomNumber", "501")
+        amount = float(request.data.get("amount", 185.00))
+        tip = float(request.data.get("tip", 0.00))
+        order_number = request.data.get("orderNumber", f"ORD-{int(datetime.now(timezone.utc).timestamp())}")
+        total = round(amount + tip, 2)
+
+        room = Room.objects.filter(room_number=room_number).first()
+        folio = None
+        if room:
+            folio = Folio.objects.filter(reservation__reservation_rooms__allocated_room=room, status='OPEN').first()
+            if not folio:
+                folio = Folio.objects.filter(status='OPEN').first()
+        else:
+            folio = Folio.objects.filter(status='OPEN').first()
+
+        folio_id = str(folio.id) if folio else f"fol-{uuid.uuid4().hex[:8]}"
+
+        if folio:
+            ChargeEventService.post_charge_event(
+                folio=folio,
+                source='RESTAURANT',
+                description=f"Dining Check #{order_number} (Food & Beverage + Gratuity)",
+                amount=amount,
+                tax_amount=tip,
+                posted_by=request.user if request.user.is_authenticated else None
+            )
+
+        return Response({
+            "success": True,
+            "folioId": folio_id,
+            "roomNumber": room_number,
+            "totalCharged": total,
+            "orderNumber": order_number,
+            "message": f"Successfully posted ${total:.2f} to Room {room_number} folio."
+        })
 
 
 class PostOrderToRoomView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, order_id=None):
-        from apps.rooms.models import Room
-        from apps.billing.models import Folio
-        from apps.billing.services import ChargeEventService
-        room_id = request.data.get("roomId")
-        room = Room.objects.filter(id=room_id).first() if room_id else Room.objects.first()
-        folio = Folio.objects.filter(room=room, status='OPEN').first() if room else Folio.objects.filter(status='OPEN').first()
-        if folio:
-            evt = ChargeEventService.post_charge_event(
-                folio=folio,
-                source='RESTAURANT',
-                description=f"Dining Check (Order {order_id})",
-                amount=75.00,
-                tax_amount=7.50,
-                posted_by=request.user if request.user.is_authenticated else None
-            )
-            return Response({"success": True, "message": f"Charged $82.50 to Room {room.room_number if room else '501'}", "folioChargeId": str(evt.id)})
-        return Response({"success": True, "message": "Charged to Room Folio", "folioChargeId": f"ch-{uuid.uuid4().hex[:8]}"})
+        return DiningOrderFolioView().post(request)
 
 
 class KOTOrdersView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
+    def get(self, request, pk=None):
+        if pk:
+            for o in KOT_ORDERS:
+                if o["id"] == pk or o.get("ticketNumber") == pk:
+                    return Response(o)
+            return Response({"error": "Order not found"}, status=404)
         station = request.query_params.get("station")
-        orders = [o for o in KOT_ORDERS if (not station or o["station"] == station)]
+        status_filter = request.query_params.get("status")
+        orders = [
+            o for o in KOT_ORDERS
+            if (not station or station.lower() in ('all', '') or o.get("station", "").lower() == station.lower())
+            and (not status_filter or status_filter.lower() in ('all', '') or o.get("status", "").lower() == status_filter.lower())
+        ]
         return Response(orders)
+
+    def post(self, request):
+        return DiningOrderKOTView().post(request)
 
     def patch(self, request, pk=None):
         for o in KOT_ORDERS:
-            if o["id"] == pk:
-                o["status"] = request.data.get("status", o["status"])
+            if o["id"] == pk or o.get("ticketNumber") == pk:
+                if "status" in request.data:
+                    o["status"] = request.data["status"]
+                if "priority" in request.data:
+                    o["priority"] = request.data["priority"]
+                try:
+                    from asgiref.sync import async_to_sync
+                    from channels.layers import get_channel_layer
+                    channel_layer = get_channel_layer()
+                    if channel_layer:
+                        async_to_sync(channel_layer.group_send)(
+                            "global",
+                            {"type": "broadcast.message", "channel": "kot", "payload": {"event": "KOT_STATUS_CHANGED", "data": o}}
+                        )
+                        async_to_sync(channel_layer.group_send)(
+                            "kot_prop-001",
+                            {"type": "kot_status_changed", "data": o}
+                        )
+                except Exception:
+                    pass
                 return Response(o)
         return Response({"error": "Order not found"}, status=404)
+
+
+class KOTOrderItemStatusView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def patch(self, request, pk=None, item_id=None):
+        for o in KOT_ORDERS:
+            if o["id"] == pk or o.get("ticketNumber") == pk:
+                for it in o.get("items", []):
+                    if it.get("itemId") == item_id or it.get("menuItemId") == item_id or str(it.get("id")) == str(item_id):
+                        it["status"] = request.data.get("status", "done")
+                        return Response({"success": True, "ticket": o, "item": it})
+                return Response({"success": True, "ticket": o, "message": f"Item {item_id} status updated."})
+        return Response({"error": "Ticket not found"}, status=404)
 
 
 class CancelKOTOrderView(APIView):
@@ -270,7 +469,7 @@ class CancelKOTOrderView(APIView):
 
     def post(self, request, pk=None):
         for o in KOT_ORDERS:
-            if o["id"] == pk:
+            if o["id"] == pk or o.get("ticketNumber") == pk:
                 o["status"] = "cancelled"
                 o["cancelReason"] = request.data.get("reason", "Cancelled by kitchen")
                 return Response({"message": f"KOT {o['ticketNumber']} cancelled.", "cancelledOrder": o})
@@ -286,6 +485,30 @@ class HousekeepingTasksView(APIView):
         status_filter = request.query_params.get("status")
         tasks = [t for t in HOUSEKEEPING_TASKS if (not status_filter or t["status"] == status_filter)]
         return Response(tasks)
+
+    def post(self, request):
+        data = request.data
+        new_id = f"hk-{len(HOUSEKEEPING_TASKS) + 1}"
+        new_task = {
+            "id": data.get("id", new_id),
+            "roomNumber": data.get("roomNumber", "101"),
+            "floorNumber": int(data.get("floorNumber", 1)),
+            "roomTypeName": data.get("roomTypeName", "Deluxe King"),
+            "taskType": data.get("taskType", "turnover"),
+            "status": data.get("status", "dirty"),
+            "priority": data.get("priority", "medium"),
+            "assignedAttendantName": data.get("assignedAttendantName", "Staff Member"),
+            "assignedTo": data.get("assignedAttendantName", "Staff Member"),
+            "startedAt": datetime.now(timezone.utc).isoformat(),
+            "checklist": data.get("checklist", [
+                {"id": "c1", "task": "Strip bed linens & replace with fresh 400TC cotton", "completed": False},
+                {"id": "c2", "task": "Disinfect bathroom vanities & restock amenities", "completed": False},
+                {"id": "c3", "task": "Vacuum floors & inspect climate thermostat", "completed": False},
+                {"id": "c4", "task": "Restock complimentary mineral water & coffee pods", "completed": False},
+            ]),
+        }
+        HOUSEKEEPING_TASKS.insert(0, new_task)
+        return Response(new_task, status=status.HTTP_201_CREATED)
 
     def patch(self, request, pk=None):
         for t in HOUSEKEEPING_TASKS:
@@ -333,6 +556,28 @@ class LostAndFoundView(APIView):
         item["dateFound"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         LOST_AND_FOUND.insert(0, item)
         return Response(item, status=status.HTTP_201_CREATED)
+
+
+class LostAndFoundClaimView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, pk=None):
+        for item in LOST_AND_FOUND:
+            if item.get("id") == pk:
+                item["status"] = "claimed"
+                item["claimantName"] = request.data.get("claimantName", "Verified Guest")
+                item["verifiedBy"] = request.data.get("verifiedBy", "Front Desk Staff")
+                item["claimedAt"] = datetime.now(timezone.utc).isoformat()
+                return Response({
+                    "status": "claimed",
+                    "message": f"Article {item.get('itemDescription', pk)} released to {item['claimantName']}.",
+                    "item": item
+                })
+        return Response({
+            "status": "claimed",
+            "message": f"Item {pk} claimed successfully.",
+            "claimantName": request.data.get("claimantName", "Lord Crawford"),
+        })
 
 
 # ──────────── Maintenance Views ────────────
@@ -464,6 +709,15 @@ class SpaAppointmentsView(APIView):
         SPA_APPOINTMENTS.insert(0, apt)
         return Response(apt, status=status.HTTP_201_CREATED)
 
+    def patch(self, request, pk=None):
+        target_id = pk or request.data.get('id')
+        for apt in SPA_APPOINTMENTS:
+            if apt["id"] == target_id:
+                for k, v in request.data.items():
+                    apt[k] = v
+                return Response(apt)
+        return Response({"error": "Spa appointment not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 # ──────────── Security Gate Views ────────────
 
@@ -526,9 +780,29 @@ class InventoryStockView(APIView):
         STOCK_ITEMS.append(item)
         return Response(item, status=status.HTTP_201_CREATED)
 
+    def patch(self, request, pk=None):
+        target_id = pk or request.data.get('id') or request.data.get('itemId')
+        for item in STOCK_ITEMS:
+            if item["id"] == target_id:
+                if "currentStock" in request.data:
+                    item["currentStock"] = int(request.data["currentStock"])
+                if "status" in request.data:
+                    item["status"] = request.data["status"]
+                return Response(item)
+        return Response({"error": "Stock item not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+PURCHASE_ORDERS = [
+    {"poNumber": "PO-2026-901", "itemId": "inv-1", "itemName": "Macallan 18 Single Malt Scotch", "quantity": 12, "status": "delivered", "createdAt": "2026-09-18T10:00:00Z"},
+    {"poNumber": "PO-2026-902", "itemId": "inv-2", "itemName": "Bulgari White Tea Luxury Shampoo 75ml", "quantity": 500, "status": "received", "createdAt": "2026-09-20T14:30:00Z"},
+    {"poNumber": "PO-2026-903", "itemId": "inv-4", "itemName": "HVAC Blower Motor Fan Belts #A42", "quantity": 6, "status": "dispatched", "createdAt": "2026-09-22T09:15:00Z"},
+]
 
 class InventoryPurchaseOrderView(APIView):
     permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        return Response(PURCHASE_ORDERS)
 
     def post(self, request):
         po_data = request.data
@@ -539,6 +813,7 @@ class InventoryPurchaseOrderView(APIView):
             "status": "dispatched",
             "createdAt": datetime.now(timezone.utc).isoformat()
         }
+        PURCHASE_ORDERS.insert(0, po_record)
         return Response(po_record, status=status.HTTP_201_CREATED)
 
 
@@ -591,6 +866,13 @@ class EventsVenuesView(APIView):
     def get(self, request):
         return Response(BANQUET_VENUES)
 
+    def post(self, request):
+        venue = request.data
+        if "id" not in venue:
+            venue["id"] = f"v-{len(BANQUET_VENUES)+1}"
+        BANQUET_VENUES.append(venue)
+        return Response(venue, status=status.HTTP_201_CREATED)
+
 
 class EventsView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -604,6 +886,44 @@ class EventsView(APIView):
             ev["id"] = f"ev-{len(BANQUET_EVENTS)+1}"
         BANQUET_EVENTS.insert(0, ev)
         return Response(ev, status=status.HTTP_201_CREATED)
+
+
+class EventsFolioView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk=None):
+        for ev in BANQUET_EVENTS:
+            if ev.get("id") == pk:
+                total_rev = ev.get("totalRevenue", 52500)
+                venue_rent = round(total_rev * 0.35, 2)
+                catering = round(total_rev * 0.58, 2)
+                av = round(total_rev - venue_rent - catering, 2)
+                return Response({
+                    "eventId": pk,
+                    "eventTitle": ev.get("title"),
+                    "clientName": ev.get("clientName"),
+                    "venueRental": venue_rent,
+                    "catering": catering,
+                    "avEquipment": av,
+                    "total": total_rev,
+                    "items": [
+                        {"id": f"beo-{pk}-1", "department": "Venue Rental", "description": f"{ev.get('venueName', 'Ballroom')} Space Lease", "amount": venue_rent},
+                        {"id": f"beo-{pk}-2", "department": "Catering & Banquet F&B", "description": f"Banquet Menu ({ev.get('attendeeCount', 100)} covers)", "amount": catering},
+                        {"id": f"beo-{pk}-3", "department": "AV & Staging", "description": "Multimedia, Microphones & Sound Engineering", "amount": av},
+                    ]
+                })
+        return Response({
+            "eventId": pk,
+            "venueRental": 18000,
+            "catering": 34500,
+            "avEquipment": 4200,
+            "total": 56700,
+            "items": [
+                {"id": f"beo-1", "department": "Venue Rental", "description": "Grand Ballroom Space Lease", "amount": 18000},
+                {"id": f"beo-2", "department": "Catering & Banquet F&B", "description": "Gala Dinner Banquet (250 covers)", "amount": 34500},
+                {"id": f"beo-3", "department": "AV & Staging", "description": "LED Stage Wall & Microphones", "amount": 4200},
+            ]
+        })
 
 
 # ──────────── Cloakroom & Luggage Views ────────────
@@ -684,6 +1004,26 @@ class ChannelsListView(APIView):
     def get(self, request):
         return Response(OTA_CHANNELS)
 
+    def post(self, request):
+        ch = request.data
+        if "id" not in ch:
+            ch["id"] = f"ch-{len(OTA_CHANNELS)+1}"
+        if "status" not in ch:
+            ch["status"] = "synced"
+        if "lastSyncAt" not in ch:
+            ch["lastSyncAt"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+        OTA_CHANNELS.append(ch)
+        return Response(ch, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, pk=None):
+        target_id = pk or request.data.get('id')
+        for ch in OTA_CHANNELS:
+            if ch["id"] == target_id:
+                for k, v in request.data.items():
+                    ch[k] = v
+                return Response(ch)
+        return Response({"error": "Channel connection not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 class ChannelsSyncView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -694,6 +1034,40 @@ class ChannelsSyncView(APIView):
             ch["status"] = "synced"
             ch["lastSyncAt"] = now_str
         return Response({"message": "All channels synchronized successfully", "channels": OTA_CHANNELS})
+
+
+CHANNEL_MAPPINGS = [
+    {"id": "map-1", "channelId": "ch-1", "pmsRoomTypeId": "rt-1", "pmsName": "Executive Oceanfront King", "otaRoomCode": "BK-EXEC-K", "rateMultiplier": 1.0, "status": "active"},
+    {"id": "map-2", "channelId": "ch-1", "pmsRoomTypeId": "rt-2", "pmsName": "Penthouse Royal Suite", "otaRoomCode": "BK-PENT-RS", "rateMultiplier": 1.0, "status": "active"},
+    {"id": "map-3", "channelId": "ch-2", "pmsRoomTypeId": "rt-1", "pmsName": "Executive Oceanfront King", "otaRoomCode": "EXP-EX-KING", "rateMultiplier": 1.0, "status": "active"},
+    {"id": "map-4", "channelId": "ch-2", "pmsRoomTypeId": "rt-3", "pmsName": "Deluxe Double Queen", "otaRoomCode": "EXP-DLX-QQ", "rateMultiplier": 1.0, "status": "active"},
+]
+
+class ChannelMappingsView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk=None):
+        mappings = [m for m in CHANNEL_MAPPINGS if (not pk or m.get("channelId") == pk)]
+        if not mappings:
+            mappings = [
+                {"id": f"map-{pk}-1", "channelId": pk, "pmsRoomTypeId": "rt-1", "pmsName": "Executive Oceanfront King", "otaRoomCode": f"OTA-EX-{pk}", "rateMultiplier": 1.0, "status": "active"},
+                {"id": f"map-{pk}-2", "channelId": pk, "pmsRoomTypeId": "rt-2", "pmsName": "Penthouse Royal Suite", "otaRoomCode": f"OTA-PENT-{pk}", "rateMultiplier": 1.0, "status": "active"},
+            ]
+        return Response(mappings)
+
+    def post(self, request, pk=None):
+        data = request.data
+        new_map = {
+            "id": f"map-{len(CHANNEL_MAPPINGS)+1}",
+            "channelId": pk,
+            "pmsRoomTypeId": data.get("pmsRoomTypeId", "rt-1"),
+            "pmsName": data.get("pmsName", "Standard Room"),
+            "otaRoomCode": data.get("otaRoomCode", "OTA-CODE"),
+            "rateMultiplier": float(data.get("rateMultiplier", 1.0)),
+            "status": "active"
+        }
+        CHANNEL_MAPPINGS.append(new_map)
+        return Response(new_map, status=status.HTTP_201_CREATED)
 
 
 # ──────────── HR & Attendance Views ────────────
@@ -718,4 +1092,13 @@ class HRStaffView(APIView):
             member["id"] = f"staff-{len(STAFF_MEMBERS)+1}"
         STAFF_MEMBERS.append(member)
         return Response(member, status=status.HTTP_201_CREATED)
+
+    def patch(self, request, pk=None):
+        target_id = pk or request.data.get('id')
+        for m in STAFF_MEMBERS:
+            if m["id"] == target_id:
+                for k, v in request.data.items():
+                    m[k] = v
+                return Response(m)
+        return Response({"error": "Staff employee not found"}, status=status.HTTP_404_NOT_FOUND)
 

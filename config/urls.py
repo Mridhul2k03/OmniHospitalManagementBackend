@@ -11,8 +11,11 @@ from drf_spectacular.views import (
 
 from apps.corporate.urls import executive_urlpatterns, shareholder_urlpatterns
 from apps.accounts.views import HealthCheckView, TenantViewSet
+from apps.billing.urls import folio_urlpatterns
+from apps.billing.views import GLExportView
 from apps.operations.urls import (
     dining_urlpatterns,
+    kot_urlpatterns,
     housekeeping_urlpatterns,
     maintenance_urlpatterns,
     transport_urlpatterns,
@@ -41,6 +44,7 @@ urlpatterns = [
     path('api/v1/health/', HealthCheckView.as_view(), name='root-health-check'),
     path('api/v1/ready/', HealthCheckView.as_view(), name='root-readiness-check'),
     path('api/v1/tenants/', include(tenant_router.urls)),
+    path('api/v1/platform/', include('apps.platform_admin.urls')),
 
     # Domain Routes
     path('api/v1/auth/', include('apps.accounts.urls')),
@@ -54,12 +58,18 @@ urlpatterns = [
     path('api/v1/guests/', include('apps.guests.urls')),
     path('api/v1/reservations/', include('apps.reservations.urls')),
     path('api/v1/billing/', include('apps.billing.urls')),
-    path('api/v1/folios/', include('apps.billing.urls')),
+    path('api/v1/folios/', include(folio_urlpatterns)),
+    path('api/v1/finance/gl-export/', GLExportView.as_view({'get': 'list'}), name='finance-gl-export'),
     path('api/v1/payments/', include('apps.payments.urls')),
     path('api/v1/frontoffice/', include('apps.frontoffice.urls')),
 
+    # Dynamic Pricing & Guest Loyalty
+    path('api/v1/pricing/', include('apps.pricing.urls')),
+    path('api/v1/loyalty/', include('apps.loyalty.urls')),
+
     # Operations & Facilities Modules
     path('api/v1/dining/', include(dining_urlpatterns)),
+    path('api/v1/kot/', include(kot_urlpatterns)),
     path('api/v1/housekeeping/', include(housekeeping_urlpatterns)),
     path('api/v1/maintenance/', include(maintenance_urlpatterns)),
     path('api/v1/transport/', include(transport_urlpatterns)),
@@ -71,4 +81,3 @@ urlpatterns = [
     path('api/v1/channels/', include(channels_urlpatterns)),
     path('api/v1/hr/', include(hr_urlpatterns)),
 ]
-

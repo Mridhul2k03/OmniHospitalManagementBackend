@@ -14,6 +14,7 @@ class RoomAmenity(models.Model):
     class Meta:
         verbose_name = "Room Amenity"
         verbose_name_plural = "Room Amenities"
+        ordering = ['name']
 
     def __str__(self):
         return self.name

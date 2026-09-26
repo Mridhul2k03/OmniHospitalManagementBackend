@@ -89,8 +89,20 @@ class HMOSGatewayConsumer(AsyncJsonWebsocketConsumer):
         """
         Handler for messages dispatched to group via group_send
         """
-        # Do not echo back to sender if flagged
         await self.send_json({
             "channel": event.get("channel", "global"),
             "payload": event.get("payload", {})
         })
+
+    async def kot_order_fired(self, event):
+        await self.send_json({"type": "KOT_ORDER_FIRED", "data": event.get("data", event.get("payload"))})
+
+    async def kot_status_changed(self, event):
+        await self.send_json({"type": "KOT_STATUS_CHANGED", "data": event.get("data", event.get("payload"))})
+
+    async def room_status_changed(self, event):
+        await self.send_json({"type": "ROOM_STATUS_CHANGED", "data": event.get("data", event.get("payload"))})
+
+    async def guest_checked_in(self, event):
+        await self.send_json({"type": "GUEST_CHECKED_IN", "data": event.get("data", event.get("payload"))})
+

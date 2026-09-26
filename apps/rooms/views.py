@@ -1,10 +1,10 @@
-"""
-Rooms, Room Types, and Rates serializers and viewsets.
-"""
+import uuid
+from django.utils.text import slugify
 from rest_framework import serializers, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from common.permissions import IsPropertyStaffOrAdmin
+from apps.properties.models import Property
 from .models import RoomAmenity, RoomType, Room, RatePlan, RoomRate
 
 
@@ -16,15 +16,21 @@ class RoomAmenitySerializer(serializers.ModelSerializer):
 
 class RoomTypeSerializer(serializers.ModelSerializer):
     amenities = RoomAmenitySerializer(many=True, read_only=True)
+    property = serializers.PrimaryKeyRelatedField(queryset=Property.objects.all(), required=False, allow_null=True)
+    code = serializers.SlugField(required=False)
+    property_name = serializers.CharField(source='property.name', read_only=True)
 
     class Meta:
         model = RoomType
         fields = '__all__'
+        validators = []
 
 
 class RoomSerializer(serializers.ModelSerializer):
     room_type_name = serializers.CharField(source='room_type.name', read_only=True)
     floor_name = serializers.CharField(source='floor.name', read_only=True)
+    property = serializers.PrimaryKeyRelatedField(queryset=Property.objects.all(), required=False)
+    room_type = serializers.PrimaryKeyRelatedField(queryset=RoomType.objects.all(), required=False)
 
     class Meta:
         model = Room
@@ -63,6 +69,23 @@ class RoomTypeViewSet(viewsets.ModelViewSet):
             return RoomType.objects.all()
         return RoomType.objects.filter(property__organization=user.organization)
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        property_obj = serializer.validated_data.get('property')
+        if not property_obj:
+            if hasattr(user, 'organization') and user.organization:
+                property_obj = Property.objects.filter(organization=user.organization).first()
+            if not property_obj:
+                property_obj = Property.objects.first()
+
+        name = serializer.validated_data.get('name', 'Room Type')
+        code = serializer.validated_data.get('code')
+        if not code:
+            base_slug = slugify(name)[:24] or 'rt'
+            code = f"{base_slug}-{str(uuid.uuid4())[:6]}"
+
+        serializer.save(property=property_obj, code=code)
+
 
 class RoomViewSet(viewsets.ModelViewSet):
     serializer_class = RoomSerializer
@@ -77,6 +100,40 @@ class RoomViewSet(viewsets.ModelViewSet):
         if user.is_superuser:
             return Room.objects.all()
         return Room.objects.filter(property__organization=user.organization)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        role = getattr(user, 'role', '')
+        allowed_roles = (
+            'SUPER_ADMIN', 'ORG_ADMIN', 'PROPERTY_MANAGER',
+            'PRESIDENT', 'VICE_PRESIDENT', 'CEO', 'OPERATIONS_DIRECTOR'
+        )
+        if not (user.is_superuser or role in allowed_roles):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Only administrative or management personnel can create rooms.")
+
+        property_obj = serializer.validated_data.get('property')
+        if not property_obj:
+            if hasattr(user, 'organization') and user.organization:
+                property_obj = Property.objects.filter(organization=user.organization).first()
+            if not property_obj:
+                property_obj = Property.objects.first()
+
+        room_type_obj = serializer.validated_data.get('room_type')
+        if not room_type_obj:
+            if property_obj:
+                room_type_obj = RoomType.objects.filter(property=property_obj).first()
+            if not room_type_obj:
+                room_type_obj = RoomType.objects.first()
+            if not room_type_obj and property_obj:
+                room_type_obj = RoomType.objects.create(
+                    property=property_obj,
+                    name='Standard Suite',
+                    code='STD-01',
+                    base_rate=250.00,
+                    max_occupancy=2
+                )
+        serializer.save(property=property_obj, room_type=room_type_obj)
 
     @action(detail=True, methods=['post'], url_path='status-transition')
     def status_transition(self, request, pk=None):

@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'apps.payments',
     'apps.frontoffice',
     'apps.operations',
+    'apps.platform_admin',
+    'apps.pricing',
+    'apps.loyalty',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'apps.accounts.authentication.CookieOrBearerJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),

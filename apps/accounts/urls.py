@@ -10,6 +10,7 @@ from .views import (
     SwitchTenantView,
     HealthCheckView,
     TenantViewSet,
+    ChangePasswordView,
 )
 
 router = DefaultRouter()
@@ -23,6 +24,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='token_logout'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', CurrentUserView.as_view(), name='current_user'),
+    path('change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('switch-tenant/', SwitchTenantView.as_view(), name='switch_tenant'),
     path('health/', HealthCheckView.as_view(), name='health_check'),
     path('ready/', HealthCheckView.as_view(), name='readiness_check'),
